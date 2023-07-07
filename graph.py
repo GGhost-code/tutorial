@@ -5,12 +5,13 @@ class Graph:
         if matrix is not None:
             self.matrix = matrix
             self.dct = self._make_dict(matrix)
+            self.list_of_edges = self._dct_to_loe()
         elif dct is not None:
             self.dct = dct
             self.matrix = self._make_matrix(dct, size)
         elif list_of_edges is not None:
             self.dct = self._make_dct_of_loe(list_of_edges, size)
-            self.matrix = self._make_matrix(self.dct, size)
+            # self.matrix = self._make_matrix(self.dct, size)
         else:
             raise RuntimeError("no graph")
         self.size = len(self.matrix) if size is None else size
@@ -18,6 +19,15 @@ class Graph:
     def print_matrix(self):
         for i in self.matrix:
             print(" ".join(map(str, i)))
+
+    def print_loe(self):
+        for i in self.list_of_edges:
+            print(*i)
+
+    def get_matrix(self):
+        if self.matrix is None:
+            self.matrix = self._make_matrix(self.dct, self.size)
+        return self.matrix
 
     def _make_dict(self, matrix):
         d = dict()
@@ -57,6 +67,16 @@ class Graph:
         c //= 2
         return c
 
+    def _dct_to_loe(self):
+        printed = set()
+        list_of_edges = []
+        for i in self.dct:
+            for j in self.dct[i]:
+                if (i, j) not in printed and (j, i) not in printed:
+                    printed.add((i, j))
+                    list_of_edges.append([i, j])
+        return list_of_edges
+
     def dfs(self, started):
         visited = set()
         visited.add(started)
@@ -93,10 +113,11 @@ class Graph:
                 c += 1
             if len(self.visited) == self.size:
                 break
-        print(c)
-        for i in lot:
-            print(i[0])
-            print(" ".join(map(str, i[1])))
+        # print(c)
+        # for i in lot:
+        #     print(i[0])
+        #     print(" ".join(map(str, i[1])))
+        return c
 
     def has_path(self, start, end):
         pass
@@ -105,13 +126,21 @@ class Graph:
         pass
 
     def is_connective(self):
-        pass
+        return self.connectivity_components_count() == 1
+
+    def is_tree(self):
+        return self.is_connective() and len(self.dct) - len(self.list_of_edges) == 1
 
 
-a = list(map(int, input().split()))
-v = a[1]
-size = a[0]
-loe = [list(map(int, input().split())) for i in range(v)]
-# matrix = [list(map(int, input().split())) for i in range(size)]
-g = Graph(size=size, list_of_edges=loe)
-g.connectivity_components_count()
+
+# a = list(map(int, input().split()))
+# v = a[1]
+# size = a[0]
+size = int(input())
+# loe = [list(map(int, input().split())) for i in range(v)]
+matrix = [list(map(int, input().split())) for i in range(size)]
+g = Graph(size=size, matrix=matrix)
+if g.is_tree():
+    print("YES")
+else:
+    print("NO")
